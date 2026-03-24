@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Persona Classification Review — APCR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1916;
+    --ink-mid: #4a4440;
+    --ink-light: #7a7470;
+    --paper: #f7f4ed;
+    --paper-warm: #ede8dc;
+    --paper-mid: #ddd7c8;
+    --accent: #3d1f00;
+    --accent-light: #6b3800;
+    --accent-pale: #f5e8d0;
+    --orange: #d8632e;
+    --orange-light: #e57540;
+    --rule: rgba(61,31,0,0.12);
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 clamp(1.5rem, 5vw, 4rem);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+
+  .nav-mark {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--ink-mid);
+    text-transform: uppercase;
+  }
+
+  .nav-mark span { color: var(--orange); }
+
+  nav a.cta-pill {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--paper);
+    background: var(--orange);
+    border: none;
+    border-radius: 100px;
+    padding: 8px 20px;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  nav a.cta-pill:hover { background: var(--orange-light); transform: translateY(-1px); }
+
+  /* LAYOUT WRAPPER */
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 5vw, 4rem);
+  }
+
+  /* HERO */
+  .hero {
+    padding: 7rem 0 5rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--orange);
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.6rem, 6vw, 4.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--orange);
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--ink-mid);
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+  }
+
+  .cta-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  a.btn-primary {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper);
+    background: var(--orange);
+    border-radius: 6px;
+    padding: 14px 28px;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  a.btn-primary:hover { background: var(--orange-light); transform: translateY(-1px); }
+
+  .price-inline {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--ink-light);
+  }
+
+  /* SECTION BASICS */
+  section { padding: 5rem 0; border-bottom: 1px solid var(--rule); }
+  section:last-of-type { border-bottom: none; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 2.5rem;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+  }
+
+  h2 em { font-style: italic; color: var(--orange); }
+
+  p { color: var(--ink-mid); margin-bottom: 1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  /* PROBLEM */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 2.5rem;
+  }
+
+  .problem-cell {
+    background: var(--paper);
+    padding: 1.75rem 1.5rem;
+  }
+
+  .problem-cell h3 {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .problem-cell p {
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* WHAT IT IS */
+  .intro-pull {
+    font-family: var(--serif);
+    font-size: clamp(1.3rem, 2.5vw, 1.65rem);
+    line-height: 1.4;
+    color: var(--ink);
+    padding: 2rem 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin: 2rem 0;
+  }
+
+  /* AREAS */
+  .areas-list {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .area-item {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+
+  .area-item:first-child { border-top: 1px solid var(--rule); }
+
+  .area-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-light);
+    padding-top: 3px;
+  }
+
+  .area-item h3 {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.35rem;
+  }
+
+  .area-item p {
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  /* HOW IT WORKS */
+  .steps {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 1.25rem;
+    padding-bottom: 2rem;
+    position: relative;
+  }
+
+  .step:last-child { padding-bottom: 0; }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--paper-warm);
+    border: 1px solid var(--paper-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-mid);
+    flex-shrink: 0;
+    margin-top: 2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-connector {
+    position: absolute;
+    left: 15px;
+    top: 34px;
+    bottom: 0;
+    width: 1px;
+    background: var(--rule);
+  }
+
+  .step:last-child .step-connector { display: none; }
+
+  .step h3 {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.3rem;
+  }
+
+  .step p {
+    font-size: 14px;
+    margin: 0;
+    color: var(--ink-mid);
+    line-height: 1.55;
+  }
+
+  /* DELIVERABLES */
+  .deliverables-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .deliverable-card {
+    background: var(--paper-warm);
+    border: 1px solid var(--paper-mid);
+    border-radius: 8px;
+    padding: 1.75rem 1.5rem;
+  }
+
+  .deliverable-card .d-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .deliverable-card h3 {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .deliverable-card p {
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  /* SCOPE */
+  .scope-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2.5rem;
+  }
+
+  .scope-col h3 {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .scope-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .scope-col ul li {
+    font-size: 14px;
+    color: var(--ink-mid);
+    padding-left: 1rem;
+    position: relative;
+    line-height: 1.45;
+  }
+
+  .scope-col.yes li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--orange);
+    font-size: 12px;
+  }
+
+  .scope-col.no li::before {
+    content: '×';
+    position: absolute;
+    left: 0;
+    color: var(--ink-light);
+    font-size: 12px;
+  }
+
+  /* PRICING */
+  .pricing-block {
+    margin-top: 2.5rem;
+    background: var(--accent);
+    border-radius: 10px;
+    padding: 3rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .pricing-left .price {
+    font-family: var(--serif);
+    font-size: 3.5rem;
+    color: var(--paper);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .pricing-left .price-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: rgba(247,244,237,0.55);
+    text-transform: uppercase;
+  }
+
+  .pricing-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .pricing-right p {
+    font-size: 15px;
+    color: rgba(247,244,237,0.75);
+    max-width: 320px;
+    margin: 0;
+  }
+
+  a.btn-light {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--orange);
+    border-radius: 6px;
+    padding: 12px 24px;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+
+  a.btn-light:hover { background: var(--orange-light); transform: translateY(-1px); }
+
+  /* NOT FOR */
+  .not-for {
+    background: var(--paper-warm);
+    border-radius: 8px;
+    border: 1px solid var(--paper-mid);
+    padding: 2rem;
+    margin-top: 2.5rem;
+  }
+
+  .not-for p {
+    font-size: 15px;
+    color: var(--ink-mid);
+    margin: 0;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-mark {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-light);
+    letter-spacing: 0.06em;
+  }
+
+  footer a {
+    font-size: 14px;
+    color: var(--ink-mid);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  footer a:hover { color: var(--accent); }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .problem-grid { grid-template-columns: 1fr; }
+    .deliverables-grid { grid-template-columns: 1fr; }
+    .scope-cols { grid-template-columns: 1fr; }
+    .pricing-block { padding: 2rem; }
+    .pricing-left .price { font-size: 2.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-mark"><span>APCR</span> — AI Persona Classification Review</div>
+  <a href="#pricing" class="cta-pill">Get started</a>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Fixed-scope structural diagnostic</div>
+      <h1>Your AI system has a voice.<br><em>Does anyone know what that means?</em></h1>
+      <p class="hero-sub">APCR is an upstream structural analysis for AI systems that are developing a recognizable persona, voice or identity — before those assumptions harden into legal and licensing problems.</p>
+      <div class="cta-row">
+        <a href="#pricing" class="btn-primary">Start a review</a>
+        <span class="price-inline">$2,500 flat fee · 5–7 day delivery</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE PROBLEM -->
+  <section>
+    <div class="wrap">
+      <div class="section-label">The problem</div>
+      <h2>Most founders can't answer the question <em>their attorney will eventually ask.</em></h2>
+      <p>Persona-like behavior — consistent voice, adaptive identity, recognizable stylistic patterns — shows up in AI systems before anyone thinks to define it. By the time it matters legally, the assumptions are already baked in.</p>
+
+      <div class="problem-grid">
+        <div class="problem-cell">
+          <h3>For founders</h3>
+          <p>You're building a product with a recognizable voice or teaching style and haven't documented what that actually is, who controls it or where the edges are.</p>
+        </div>
+        <div class="problem-cell">
+          <h3>For attorneys</h3>
+          <p>A client comes in with an AI product. The structural questions — authorship, persona boundaries, attribution scope — aren't answered anywhere in their documentation.</p>
+        </div>
+        <div class="problem-cell">
+          <h3>When it surfaces</h3>
+          <p>Attribution disputes. Compensation questions. Brand identity conflicts. Licensing gaps. These aren't hypothetical — they're the downstream cost of skipping the upstream work.</p>
+        </div>
+        <div class="problem-cell">
+          <h3>The timing problem</h3>
+          <p>Design decisions harden fast. The earlier you surface structural ambiguity, the less expensive it is to resolve — or even just to name.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT IT IS -->
+  <section>
+    <div class="wrap">
+      <div class="section-label">What this is</div>
+      <h2>A contained diagnostic. Not a philosophy session.</h2>
+
+      <div class="intro-pull">
+        APCR determines what kind of thing a founder is actually building — and whether its structural behavior aligns with current licensing and authorship definitions before those assumptions become problems.
+      </div>
+
+      <p>It's not a technical audit, a legal opinion or a governance roadmap. It's a sharp specialist review focused on persona definition, authorship framing and attribution clarity — delivered in writing, within a defined scope, on a fixed timeline.</p>
+      <p>The output is designed to be useful on its own and to give attorneys a clean, structured starting point when it's time to draft licenses, terms or creator agreements.</p>
+    </div>
+  </section>
+
+  <!-- AREAS OF ASSESSMENT -->
+  <section>
+    <div class="wrap">
+      <div class="section-label">Areas of assessment</div>
+      <h2>Five structural questions, <em>answered in writing.</em></h2>
+
+      <div class="areas-list">
+        <div class="area-item">
+          <div class="area-num">01</div>
+          <div>
+            <h3>Persona structure</h3>
+            <p>How does the system's stylistic identity show up across outputs? At what point does repetition start to look like a specific voice instead of a generic style?</p>
+          </div>
+        </div>
+        <div class="area-item">
+          <div class="area-num">02</div>
+          <div>
+            <h3>Authorship boundaries</h3>
+            <p>What clearly comes from a creator's influence and what comes from system recombination? Where does that line start to blur?</p>
+          </div>
+        </div>
+        <div class="area-item">
+          <div class="area-num">03</div>
+          <div>
+            <h3>Continuity & authority</h3>
+            <p>Who controls how the persona evolves? Is that authority defined in the system description or simply implied by system behavior?</p>
+          </div>
+        </div>
+        <div class="area-item">
+          <div class="area-num">04</div>
+          <div>
+            <h3>Attribution & scope</h3>
+            <p>Do outputs show sustained influence or persona continuity that goes beyond the stated attribution scope?</p>
+          </div>
+        </div>
+        <div class="area-item">
+          <div class="area-num">05</div>
+          <div>
+            <h3>Structural risk surface</h3>
+            <p>Where could misattribution, identity confusion or compensation leakage emerge as the system scales?</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section>
+    <div class="wrap">
+      <div class="section-label">How it works</div>
+      <h2>Three inputs. Two deliverables. <em>One week.</em></h2>
+
+      <div class="steps">
+        <div class="step">
+          <div>
+            <div class="step-num">01</div>
+            <div class="step-connector"></div>
+          </div>
+          <div>
+            <h3>You provide a system summary</h3>
+            <p>A 2–3 page written description of your AI system — what it does, how it behaves, how its persona or voice shows up.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <div class="step-num">02</div>
+            <div class="step-connector"></div>
+          </div>
+          <div>
+            <h3>Five targeted follow-up questions</h3>
+            <p>I issue a focused set of follow-up questions specific to your system. No calls required.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <div class="step-num">03</div>
+            <div class="step-connector"></div>
+          </div>
+          <div>
+            <h3>Written assessment delivered</h3>
+            <p>Two documents — a client-facing advisory report and an attorney-facing summary — delivered within 5–7 business days of receiving all materials.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="deliverables-grid">
+        <div class="deliverable-card">
+          <span class="d-tag">Deliverable 01</span>
+          <h3>Client-facing advisory report</h3>
+          <p>A full structural assessment of persona definition, authorship framing and attribution clarity — written for the founder and their team.</p>
+        </div>
+        <div class="deliverable-card">
+          <span class="d-tag">Deliverable 02</span>
+          <h3>Attorney-facing summary</h3>
+          <p>A condensed 1–2 page brief designed for legal counsel to quickly grasp the system's identity model and boundary status.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCOPE -->
+  <section>
+    <div class="wrap">
+      <div class="section-label">Scope</div>
+      <h2>What APCR is — and <em>isn't.</em></h2>
+      <p>The value of this review comes partly from what it doesn't try to do. It's a contained specialist review, not a catch-all audit.</p>
+
+      <div class="scope-cols">
+        <div class="scope-col yes">
+          <h3>What it is</h3>
+          <ul>
+            <li>Upstream structural analysis</li>
+            <li>Persona definition assessment</li>
+            <li>Authorship boundary analysis</li>
+            <li>Attribution clarity review</li>
+            <li>Pre-legal diagnostic starting point</li>
+            <li>Written, fixed-scope deliverable</li>
+          </ul>
+        </div>
+        <div class="scope-col no">
+          <h3>What it isn't</h3>
+          <ul>
+            <li>Legal advice or legal opinion</li>
+            <li>Technical architecture review</li>
+            <li>Contract interpretation</li>
+            <li>Compliance certification</li>
+            <li>Long-term governance consulting</li>
+            <li>Implementation or design work</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="not-for">
+        <p>APCR is particularly relevant to founders building in music-tech and music education — where AI-mediated creative and instructional behavior intersects with established attribution frameworks. It's applicable across creative technology and entertainment contexts more broadly.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="wrap">
+      <div class="section-label">Investment</div>
+      <h2>One review. One price. <em>Everything included.</em></h2>
+
+      <div class="pricing-block">
+        <div class="pricing-left">
+          <div class="price">$2,500</div>
+          <div class="price-label">per review · flat fee</div>
+        </div>
+        <div class="pricing-right">
+          <p>Includes the system summary review, five follow-up questions, the full client-facing advisory report and the attorney-facing summary. Delivered within 5–7 business days.</p>
+          <a href="#PAYMENT_LINK_PLACEHOLDER" class="btn-light">Start your review →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section>
+    <div class="wrap">
+      <div class="section-label">About</div>
+      <h2>A perspective built outside <em>the usual rooms.</em></h2>
+      <p>My background is in music performance, theatre and live production — not law or engineering. That context shapes how I see these questions. The structural ambiguities that get missed in technical or legal review often aren't invisible at all. They're just not visible from inside the usual vantage points.</p>
+      <p>APCR is designed to be the work that happens before the legal conversation — to surface what needs naming before anyone drafts an agreement around it.</p>
+      <p style="margin-top: 1.5rem; font-size: 15px;">Questions? <a href="/cdn-cgi/l/email-protection#a2c3d2d0cbcee2c5cecdc0c3ced4cbc0c7c1d0c7c3d6cbd4c78cc1cdcf" style="color: var(--orange); text-decoration: none;"><span class="__cf_email__" data-cfemail="89e8f9fbe0e5c9eee5e6ebe8e5ffe0ebeceafbece8fde0ffeca7eae6e4">[email&#160;protected]</span></a></p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-mark">APCR — AI Persona Classification Review · 
